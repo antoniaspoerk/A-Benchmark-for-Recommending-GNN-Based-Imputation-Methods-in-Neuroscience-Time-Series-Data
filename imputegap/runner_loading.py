@@ -1,6 +1,6 @@
 import os
 
-ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "imputegap_assets"))
+ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "imputegap_assets"))
 
 from imputegap.recovery.manager import TimeSeries
 from imputegap.tools import utils

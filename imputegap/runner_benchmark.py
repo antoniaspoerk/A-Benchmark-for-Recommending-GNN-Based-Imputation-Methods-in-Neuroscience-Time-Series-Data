@@ -1,6 +1,6 @@
 import os
 
-ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "imputegap_assets"))
+ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "imputegap_assets"))
 
 from imputegap.recovery.benchmark import Benchmark
 from imputegap.tools import utils

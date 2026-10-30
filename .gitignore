@@ -33,3 +33,13 @@ imputegap/datasets/test-large.txt
 # Thesis: ds004504 preparation (raw EEG downloads stay local)
 /data/
 imputegap/datasets/preparation/**/__pycache__/
+
+# Thesis: local files that should not be versioned
+.DS_Store
+.vscode/
+imputegap.egg-info/
+imputegap/imputegap_env/
+imputegap/imputegap_assets/datasets/
+imputegap/imputegap_assets/downstream/
+imputegap/imputegap_assets/logs/
+imputegap/imputegap_assets/models/saits/

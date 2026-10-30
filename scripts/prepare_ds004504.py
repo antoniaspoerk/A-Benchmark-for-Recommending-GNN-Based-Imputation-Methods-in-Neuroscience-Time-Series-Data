@@ -10,7 +10,7 @@ from src.datasets.ds004504 import load_subject, save_subject
 
 RAW_DIR = ROOT / "data" / "raw" / "ds004504"
 OUT_DIR = ROOT / "data" / "processed" / "ds004504"
-DATASETS_DIR = ROOT / "ImputeGAP" / "imputegap" / "datasets"  # ImputeGAP loads datasets from here
+DATASETS_DIR = ROOT / "imputegap" / "datasets"  # ImputeGAP loads datasets from here
 
 
 def main():
