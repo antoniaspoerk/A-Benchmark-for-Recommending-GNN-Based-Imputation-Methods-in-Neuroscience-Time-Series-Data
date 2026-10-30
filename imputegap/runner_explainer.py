@@ -1,3 +1,8 @@
+import os
+
+ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "imputegap_assets"))
+
+from contextlib import chdir
 from imputegap.recovery.manager import TimeSeries
 from imputegap.recovery.explainer import Explainer
 from imputegap.tools import utils
@@ -11,7 +16,8 @@ print(f"\nImputeGAP explainer features extractor : {ts.extractors}")
 ts.load_series(utils.search_path("eeg-alcohol"), normalizer="z_score")
 
 # configure the explanation
-exp.shap_explainer(input_data=ts.data, extractor="pycatch", pattern="mcar", file_name=ts.name, algorithm="CDRec")
+with chdir(os.path.dirname(ASSETS)):
+    exp.shap_explainer(input_data=ts.data, extractor="pycatch", pattern="mcar", file_name=ts.name, algorithm="CDRec")
 
 # print the impact of each feature
 exp.print(exp.shap_values, exp.shap_details)

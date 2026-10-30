@@ -87,6 +87,11 @@ rank = 4
 k = 5
 weights = "uniform"
 
+[window_impute]
+window=10 
+stat = "mean"
+
+
 [interpolation]
 method = "linear"
 poly_order = 2

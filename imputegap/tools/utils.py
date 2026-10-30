@@ -155,6 +155,10 @@ def load_parameters(query: str = "default", algorithm: str = "cdrec", dataset: s
         k = int(config[algorithm]['k'])
         weights = str(config[algorithm]['weights'])
         return (k, weights)
+    elif algorithm == "window_impute":
+        window = int(config[algorithm]['window'])
+        stat = str(config[algorithm]['stat'])
+        return (window, stat)
     elif algorithm == "interpolation":
         method = str(config[algorithm]['method'])
         poly_order = int(config[algorithm]['poly_order'])
@@ -530,6 +534,8 @@ def config_impute_algorithm(incomp_data, algorithm, verbose=True):
     # 3rd generation
     elif alg == "knn" or alg == "knnimpute":
         imputer = Imputation.Statistics.KNNImpute(incomp_data)
+    elif alg == "windowimpute" or alg == "window_impute":
+        imputer = Imputation.Statistics.WindowImpute(incomp_data)
     elif alg == "interpolation":
         imputer = Imputation.Statistics.Interpolation(incomp_data)
     elif alg == "meanseries" or alg == "meanimputebyseries":
@@ -728,6 +734,11 @@ def save_optimization(optimal_params, algorithm="cdrec", dataset="", optimizer="
         params_to_save = {
             "k": int(optimal_params[0]),
             "weights": str(optimal_params[1])
+        }
+    elif algorithm == "window_impute":
+        params_to_save = {
+            "window": int(optimal_params[0]),
+            "stat": str(optimal_params[1])
         }
     elif algorithm == "interpolation":
         params_to_save = {
@@ -2460,6 +2471,7 @@ def list_of_algorithms():
         "MICE",
         "MissForest",
         "KNNImpute",
+        "WindowImpute",
         "Interpolation",
         "MinImpute",
         "MeanImpute",
@@ -2525,6 +2537,7 @@ def list_of_datasets(txt=False):
         "chlorine",
         "climate",
         "drift",
+        "ds004504_sub-001",
         "eeg-alcohol",
         "eeg-reading",
         "electricity",
@@ -2747,6 +2760,7 @@ def list_of_algorithms_with_families(specify_family=None):
         "MachineLearning.MICE",
         "MachineLearning.MissForest",
         "Statistics.KNNImpute",
+        "Statistics.WindowImpute",
         "Statistics.Interpolation",
         "Statistics.MinImpute",
         "Statistics.MeanImpute",

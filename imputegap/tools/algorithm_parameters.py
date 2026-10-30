@@ -154,6 +154,11 @@ RAYTUNE_PARAMS = {
         "weights": tune.choice(["uniform", "distance"])
     },
 
+    "window_impute": {
+        "window": tune.grid_search([5, 10, 25, 50]),
+        "stat": tune.choice(["mean", "median"])
+    },
+
 
     "knn": {
         "k": tune.grid_search([1, 3, 5, 7, 10]),

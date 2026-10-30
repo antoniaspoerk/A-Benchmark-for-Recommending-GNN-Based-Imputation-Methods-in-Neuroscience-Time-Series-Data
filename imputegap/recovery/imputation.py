@@ -440,7 +440,22 @@ class Imputation:
                 self.recov_data = mean_impute(self.incomp_data, params)
 
                 return self
+            
+        class WindowImpute(BaseImputer):
+            algorithm = "window_impute"
 
+            def impute(self, user_def=True, params=None):
+
+                from imputegap.algorithms.window_impute import window_impute
+
+                if params is not None:
+                    window, stat = self._check_params(user_def, params)
+                else:
+                    window, stat = utils.load_parameters(query="default", algorithm=self.algorithm, verbose=self.verbose)
+
+                self.recov_data = window_impute(self.incomp_data, window=window, stat=stat)
+
+                return self
         class MinImpute(BaseImputer):
             """
             MinImpute class to impute missing values with the minimum value of the ground truth.
