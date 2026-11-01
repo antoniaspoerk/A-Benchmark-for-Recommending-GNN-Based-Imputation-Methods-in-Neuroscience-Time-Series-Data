@@ -40,6 +40,5 @@ imputegap/datasets/preparation/**/__pycache__/
 imputegap.egg-info/
 imputegap/imputegap_env/
 imputegap/imputegap_assets/datasets/
-imputegap/imputegap_assets/downstream/
 imputegap/imputegap_assets/logs/
 imputegap/imputegap_assets/models/saits/
