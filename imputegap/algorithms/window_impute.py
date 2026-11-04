@@ -12,8 +12,8 @@ def window_impute(incomp_data, window=10, stat="mean"):
     agg= np.nanmedian if stat == "median" else np.nanmean
 
     for s in range(n_series): 
-        col = incomp_data[:,s]
-        for t in np.where(np.isnan(col))[0]: 
+        col = recov_data[:,s]
+        for t in np.where(np.isnan(incomp_data[:,s]))[0]: 
             nb = col[max(0, t - window):t+window+1]
             recov_data[t, s] = agg(nb) if np.any(~np.isnan(nb)) else np.nanmean(col) #use median or mean to aggregate
 

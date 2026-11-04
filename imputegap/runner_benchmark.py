@@ -5,13 +5,13 @@ ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "imputegap_asse
 from imputegap.recovery.benchmark import Benchmark
 from imputegap.tools import utils
 
-my_algorithms = ["GRIN", "BitGraph"]
+my_algorithms = ["GRIN", "BitGraph","WindowImpute"]
 
 my_opt = "default_params"
 
 my_datasets = ["ds004504_sub-001"]
 
-my_patterns = ["mcar"]
+my_patterns = ["mcar", "aligned", "scattered", "blackout", "disjoint", "overlap", "gaussian"]
 
 range = [0.05, 0.1, 0.2, 0.4, 0.6, 0.8]
 
