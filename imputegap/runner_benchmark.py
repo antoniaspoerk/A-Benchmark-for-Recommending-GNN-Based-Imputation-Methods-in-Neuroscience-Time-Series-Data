@@ -5,7 +5,7 @@ ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "imputegap_asse
 from imputegap.recovery.benchmark import Benchmark
 from imputegap.tools import utils
 
-my_algorithms = ["GRIN", "BitGraph","WindowImpute"]
+my_algorithms = ["MeanImpute","WindowImpute"]
 
 my_opt = "default_params"
 

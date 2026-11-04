@@ -1,0 +1,12 @@
+
+The benchmark has been called:
+	algorithms: ['MeanImpute', 'WindowImpute']
+	datasets: ['ds004504_sub-001']
+	patterns: ['mcar', 'aligned', 'scattered', 'blackout', 'disjoint', 'overlap', 'gaussian']
+	missing_percentages: [0.05, 0.1, 0.2, 0.4, 0.6, 0.8]
+	optimizer: default_params
+	normalizer: z_score
+	runs: 1
+	number max series: 200
+	number max values: 2000
+
