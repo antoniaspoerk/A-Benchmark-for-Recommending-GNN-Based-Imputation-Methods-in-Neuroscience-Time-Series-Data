@@ -21,6 +21,7 @@ def sparse_softmax(src:Tensor, index:Optional[Tensor]=None,ptr:Optional[Tensor]=
     N=maybe_num_nodes(index,num_nodes)
     src_max=scatter(src,index,dim,dim_size=N,reduce="max")
     src_max=src_max.index_select(dim,index)
+    src_max=src_max.masked_fill(torch.isinf(src_max),0)
     out=(src-src_max).exp()
     out_sum=scatter(out,index,dim,dim_size=N,reduce="sum")
     out_sum=out_sum.index_select(dim,index)

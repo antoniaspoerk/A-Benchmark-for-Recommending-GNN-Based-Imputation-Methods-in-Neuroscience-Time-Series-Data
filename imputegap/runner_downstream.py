@@ -22,10 +22,10 @@ print(f"\nImputeGAP downstream models for forcasting : {ts.forecasting_models}")
 ts.load_series(utils.search_path("ds004504_sub-001"), normalizer="z_score")
 
 # contaminate the time series
-ts_m = GenGap.aligned(ts.data, rate_series=0.7) # type: ignore
+ts_m = GenGap.disjoint(ts.data, rate_series=0.7) # type: ignore
 
 # define and impute the contaminated series
-imputer = Imputation.DeepLearning.BitGraph(ts_m)
+imputer = Imputation.Statistics.WindowImpute(ts_m)
 imputer.impute()
 
 # compute and print the downstream results
