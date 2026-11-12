@@ -214,6 +214,20 @@ def load_parameters(query: str = "default", algorithm: str = "cdrec", dataset: s
         patience = int(config[algorithm]['patience'])
         num_workers = int(config[algorithm]['num_workers'])
         return (seq_len, sim_type, epochs, batch_size, sliding_windows, alpha, patience, num_workers)
+    elif algorithm == "spin":
+        seq_len = int(config[algorithm]['seq_len'])
+        batch_size = int(config[algorithm]['batch_size'])
+        epochs = int(config[algorithm]['epochs'])
+        sliding_windows = int(config[algorithm]['sliding_windows'])
+        sim_type = str(config[algorithm]['sim_type'])
+        hidden_size = int(config[algorithm]['hidden_size'])
+        n_layers = int(config[algorithm]['n_layers'])
+        eta = int(config[algorithm]['eta'])
+        lr = float(config[algorithm]['lr'])
+        patience = int(config[algorithm]['patience'])
+        batches_epoch = int(config[algorithm]['batches_epoch'])
+        num_workers = int(config[algorithm]['num_workers'])
+        return (seq_len, batch_size, epochs, sliding_windows, sim_type, hidden_size, n_layers, eta, lr, patience, batches_epoch, num_workers)
     elif algorithm == "bay_otide":
         K_trend = int(config[algorithm]['K_trend'])
         K_season = int(config[algorithm]['K_season'])
@@ -558,6 +572,8 @@ def config_impute_algorithm(incomp_data, algorithm, verbose=True):
         imputer = Imputation.DeepLearning.GAIN(incomp_data)
     elif alg == "grin":
         imputer = Imputation.DeepLearning.GRIN(incomp_data)
+    elif alg == "spin": 
+        imputer = Imputation.DeepLearning.SPIN(incomp_data)
     elif alg == "bayotide":
         imputer = Imputation.DeepLearning.BayOTIDE(incomp_data)
     elif alg == "hkmft" or alg == "hkmf-t" :
@@ -792,6 +808,23 @@ def save_optimization(optimal_params, algorithm="cdrec", dataset="", optimizer="
             "patience": int(optimal_params[6]),
             "num_workers": int(optimal_params[7])
         }
+
+    elif algorithm == "spin":
+        params_to_save = {
+            "seq_len": int(optimal_params[0]),
+            "batch_size": int(optimal_params[1]),
+            "epochs": int(optimal_params[2]),
+            "sliding_windows": int(optimal_params[3]),
+            "sim_type": optimal_params[4],
+            "hidden_size": int(optimal_params[5]),
+            "n_layers": int(optimal_params[6]),
+            "eta": int(optimal_params[7]),
+            "lr": float(optimal_params[8]),
+            "patience": int(optimal_params[9]),
+            "batches_epoch": int(optimal_params[10]),
+            "num_workers": int(optimal_params[11])
+        }
+        
     elif algorithm == "bay_otide" or algorithm == "bayotide":
         params_to_save = {
             "K_trend": int(optimal_params[0]),
@@ -2488,6 +2521,7 @@ def list_of_algorithms():
         "BayOTIDE",
         "HKMFT",
         "BitGraph",
+        "SPIN",
         "SAITS",
         "NuwaTS",
         "GPT4TS",
@@ -2777,6 +2811,7 @@ def list_of_algorithms_with_families(specify_family=None):
         "DeepLearning.BayOTIDE",
         "DeepLearning.HKMFT",
         "DeepLearning.BitGraph",
+        "DeepLearning.SPIN",
         "DeepLearning.SAITS",
         "DeepLearning.CSDI",
         "DeepLearning.TimesNet",

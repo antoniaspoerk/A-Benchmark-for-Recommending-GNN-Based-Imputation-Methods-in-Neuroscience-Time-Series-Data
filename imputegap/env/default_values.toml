@@ -166,6 +166,20 @@ patience = 40
 num_workers = 0
 
 
+[spin]
+seq_len = 24
+batch_size = 8
+epochs = 30
+sliding_windows = 1
+sim_type = "corr"
+hidden_size = 32
+n_layers = 4
+eta = 3
+lr = 0.0008
+patience = 40
+batches_epoch = 50
+num_workers = 0
+
 [bay_otide]
 K_trend = 30
 K_season = 1

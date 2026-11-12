@@ -2548,6 +2548,23 @@ class Imputation:
 
                 return self
 
+            
+        class SPIN(BaseImputer): 
+            algorithm = "spin"
+            def impute(self, user_def=True, params=None, tr_ratio=0.7): 
+                
+                from imputegap.algorithms.spin import spin 
+
+                if params is not None: 
+                    seq_len, batch_size, epochs, sliding_windows, sim_type, hidden_size, n_layers, eta, lr, patience, batches_epoch, num_workers = self._check_params(user_def, params)
+                else: 
+                    seq_len, batch_size, epochs, sliding_windows, sim_type, hidden_size, n_layers, eta, lr, patience, batches_epoch, num_workers = utils.load_parameters(query="default", algorithm=self.algorithm, verbose=self.verbose)
+
+                self.recov_data = spin(incomp_data=self.incomp_data, seq_len=seq_len, batch_size=batch_size, epochs=epochs, sliding_windows=sliding_windows, sim_type=sim_type, hidden_size=hidden_size, n_layers=n_layers, eta=eta, lr=lr, patience=patience, batches_epoch=batches_epoch, num_workers=num_workers, tr_ratio=tr_ratio, logs=self.logs, verbose=self.verbose)
+
+                return self 
+
+            
         class BayOTIDE(BaseImputer):
             """
             BayOTIDE class to impute missing values using Bayesian Online Multivariate Time series Imputation with functional decomposition

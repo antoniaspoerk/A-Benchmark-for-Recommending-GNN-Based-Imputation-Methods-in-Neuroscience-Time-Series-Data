@@ -5,15 +5,15 @@ ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "imputegap_asse
 from imputegap.recovery.benchmark import Benchmark
 from imputegap.tools import utils
 
-my_algorithms = ["MeanImpute","WindowImpute"]
+my_algorithms = ["SPIN"]
 
 my_opt = "default_params"
 
 my_datasets = ["ds004504_sub-001"]
 
-my_patterns = ["mcar", "aligned", "scattered", "blackout", "disjoint", "overlap", "gaussian"]
+my_patterns = ["aligned"]
 
-range = [0.05, 0.1, 0.2, 0.4, 0.6, 0.8]
+range = [0.2]
 
 # launch the evaluation
 bench = Benchmark()

@@ -19,7 +19,7 @@ ts_m = GenGap.disjoint(ts.data, rate_series=0.25, limit=1, offset=0.1, logic_by_
 
 # impute the contaminated series
 #imputer = Imputation.MatrixCompletion.CDRec(ts_m)
-imputer = Imputation.Statistics.WindowImpute(ts_m)
+imputer = Imputation.DeepLearning.SPIN(ts_m)
 imputer.impute()
 
 # compute and print the imputation metrics

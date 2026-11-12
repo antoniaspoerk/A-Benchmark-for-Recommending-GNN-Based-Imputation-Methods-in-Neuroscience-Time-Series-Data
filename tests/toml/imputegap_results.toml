@@ -118,6 +118,11 @@ dataset = "chlorine"
 rmse = 0.32
 mae = 0.22
 
+[spin]
+dataset="ds004504_sub-001"
+rmse=1.18
+mae=0.99
+
 [grin]
 dataset = "chlorine"
 rmse = 0.12
