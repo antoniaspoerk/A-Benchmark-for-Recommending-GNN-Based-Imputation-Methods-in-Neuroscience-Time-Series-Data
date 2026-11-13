@@ -158,7 +158,7 @@ hint_rate = 0.9
 [grin]
 seq_len = -1
 sim_type = "corr"
-epochs = 30
+epochs = 2
 batch_size = -1
 sliding_windows = 1
 alpha = 10.0
@@ -169,7 +169,7 @@ num_workers = 0
 [spin]
 seq_len = 24
 batch_size = 8
-epochs = 30
+epochs = 2
 sliding_windows = 1
 sim_type = "corr"
 hidden_size = 32
@@ -177,7 +177,7 @@ n_layers = 4
 eta = 3
 lr = 0.0008
 patience = 40
-batches_epoch = 50
+batches_epoch = 5
 num_workers = 0
 
 [bay_otide]

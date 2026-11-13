@@ -57,6 +57,10 @@ tsfresh>=0.20.3
 # grin
 einops>=0.8.0
 
+#spin 
+torch-scatter>=2.1.2
+torch-sparse>=0.6.18
+torch-spatiotemporal>=0.1.1,<0.2
 
 # automl
 ray>=2.41.0
