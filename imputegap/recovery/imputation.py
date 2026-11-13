@@ -2550,9 +2550,117 @@ class Imputation:
 
             
         class SPIN(BaseImputer): 
+            """
+            SPIN class to impute missing values using LEARNING TO RECONSTRUCT MISSING DATA FROM SPATIOTEMPORAL GRAPHS WITH SPARSE OBSERVATIONS
+
+            Methods
+            -------
+            impute(self, user_def=True, params=None):
+                Perform imputation using the SPIN
+
+            Example
+            -------
+            $ spin.impute(params={"seq_len":24, "batch_size":8, "epochs":30, "sliding_windows":1, "sim_type":"corr", "hidden_size":32, "n_layers":4, "eta":3, "lr":0.0008, "patience":40, "batches_epoch":50, "num_workers":0})
+
+            Changes
+            -------
+
+            - Added a custom loader for multivariate data from ImputeGAP (dataset_imputegap.py) replacing the tsl dataset classes (ImputationDataset, SpatioTemporalDataModule), including sliding windows of length seq_len and train/val/test split based on ImputeGAP's training ratio
+
+            - The missing values used for validation and testing (25% of the observed values, point-missing setting of the authors, p_noise=0.25, seed 56789) are added on top of the missing values introduced by ImputeGAP
+
+            - Adaptation of the node similarity graph from the data: since no meta data with sensor distances is available, the adjacency is computed from the Pearson correlation of the training data (threshold 0.1, symmetric, no self-loops), or fully connected if sim_type='uniform'
+
+            - Adaptation of the temporal encoding: since ImputeGAP provides no timestamps, a synthetic time index with 5-minute steps is used to compute the day/week sine-cosine features (as in GRIN)
+
+            - Adaptation of the scaling: z-score normalization per series fitted on the training values, instead of one global StandardScaler
+
+            - Replacement of the PyTorch Lightning / tsl training engine by a plain PyTorch training loop reproducing the original training procedure (whitening of 20/50/80% of the observed values, L1 loss on the injected missing values for the final output and all layer imputations, Adam, cosine scheduler with restarts, gradient clipping 5, early stopping on the validation MAE). The gradient accumulation of the original (split_batch_in) is not used.
+
+            - Validation and test windows do not overlap (stride = seq_len) instead of stride 1.
+
+            - Addition of a reconstruction module: the full series is imputed window by window using all observed values, the overlapping windows are averaged back into the original matrix shape, and only the values missing in ImputeGAP's matrix are replaced.
+
+            - Training runs on CUDA or CPU only (Apple MPS is not supported by the sparse attention operations).
+
+            - Reduction of the epochs parameter to 30 (original: 300) and of batches_epoch to 50 (original: 300) for performance reasons.
+            """
+
             algorithm = "spin"
+
             def impute(self, user_def=True, params=None, tr_ratio=0.7): 
-                
+                """
+                Perform imputation using the Learning to Reconstruct Missing Data from Spatiotemporal Graphs with Sparse Observations
+
+                Parameters
+                ----------
+                user_def : bool, optional
+                    Whether to use user-defined or default parameters (default is True).
+
+                params : dict, optional
+                    Parameters of the SPIN algorithm or Auto-ML configuration, if None, default ones are loaded.
+
+                tr_ratio: float, optional
+                    Split ratio between training and testing sets (default is 0.7).
+
+
+                **Algorithm parameters:**
+
+                seq_len : int, optional, default=24
+                    Length of the input window (number of time steps per sample).
+
+                batch_size : int, optional, default=8
+                    The number of windows per training batch.
+
+                epochs : int, optional, default=30
+                    The maximum number of training epochs.
+
+                sliding_windows : int, optional, default=1
+                    Stride between consecutive windows used for the reconstruction. If set to 0, the window size is equal to seq_len.
+
+                sim_type : string, optional, default="corr"
+                    Function used to build the graph between series: (corr, uniform)
+
+                hidden_size : int, optional, default=32
+                    Size of the hidden representations.
+
+                n_layers : int, optional, default=4
+                    Number of spatiotemporal attention layers.
+
+                eta : int, optional, default=3
+                    Number of layers in which only observed values are used as keys.
+
+                lr : float, optional, default=0.0008
+                    Learning rate of the Adam optimizer.
+
+                patience : int, optional, default=40
+                    Number of epochs without improvement before early stopping is triggered.
+
+                batches_epoch : int, optional, default=50
+                    Maximum number of training batches per epoch.
+
+                num_workers : int, optional, default=0
+                    The number of worker processes for data loading.
+
+
+                Returns
+                -------
+                self : SPIN
+                    SPIN object with `recov_data` set.
+
+                Example
+                -------
+                >>> spin_imputer = Imputation.DeepLearning.SPIN(incomp_data)
+                >>> spin_imputer.impute()  # default parameters for imputation > or
+                >>> spin_imputer.impute(user_def=True, params={"seq_len":24, "batch_size":8, "epochs":30, "sliding_windows":1, "sim_type":"corr", "hidden_size":32, "n_layers":4, "eta":3, "lr":0.0008, "patience":40, "batches_epoch":50, "num_workers":0})  # user defined
+                >>> recov_data = spin_imputer.recov_data
+
+                References
+                ----------
+                I. Marisca, A. Cini, and C. Alippi, "Learning to Reconstruct Missing Data from Spatiotemporal Graphs with Sparse Observations," Advances in Neural Information Processing Systems (NeurIPS), 2022
+                https://github.com/Graph-Machine-Learning-Group/spin
+                """
+
                 from imputegap.algorithms.spin import spin 
 
                 if params is not None: 
@@ -2564,7 +2672,7 @@ class Imputation:
 
                 return self 
 
-            
+
         class BayOTIDE(BaseImputer):
             """
             BayOTIDE class to impute missing values using Bayesian Online Multivariate Time series Imputation with functional decomposition

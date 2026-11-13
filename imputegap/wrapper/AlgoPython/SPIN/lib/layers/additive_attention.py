@@ -7,9 +7,10 @@ from torch.nn import LayerNorm, functional as F
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear
 from torch_geometric.typing import Adj, OptTensor, PairTensor
-from torch_geometric.utils import scatter
-from ..tsl.nn.blocks.encoders.mlp import MLP
-from ..tsl.nn.functional import sparse_softmax
+from torch_scatter import scatter
+from torch_scatter.utils import broadcast
+from tsl.nn.blocks.encoders import MLP
+from tsl.nn.functional import sparse_softmax
 
 
 class AdditiveAttention(MessagePassing):
@@ -115,7 +116,8 @@ class AdditiveAttention(MessagePassing):
             weights = weights.masked_fill(torch.logical_not(mask), fill_value)
         # eventually reweight
         if self.reweight == 'l1':
-            weights_sum = scatter(weights,index, self.node_dim,
+            expanded_index = broadcast(index, weights, self.node_dim)
+            weights_sum = scatter(weights, expanded_index, self.node_dim,
                                   dim_size=num_nodes, reduce='sum')
             weights_sum = weights_sum.index_select(self.node_dim, index)
             weights = weights / (weights_sum + 1e-5)
@@ -181,7 +183,7 @@ class TemporalAdditiveAttention(AdditiveAttention):
                                                      device=x_src.device))
         if temporal_mask is not None:
             assert temporal_mask.size() == (l, s)
-            i, j = torch.meshgrid(i, j,indexing="ij")
+            i, j = torch.meshgrid(i, j)
             edge_index = torch.stack((j[temporal_mask], i[temporal_mask]))
         else:
             edge_index = torch.cartesian_prod(j, i).T

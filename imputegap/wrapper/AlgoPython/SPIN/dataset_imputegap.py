@@ -73,8 +73,8 @@ def get_dataloader(ts_m, seq_len, batch_size, stride=1, sim_type="corr", tr_rati
         return DataLoader(ds, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=num_workers)
 
     train_loader = make(window_starts(0, train_end, seq_len, 1), training_mask, shuffle=True, drop_last=True)
-    valid_loader = make(window_starts(train_end, val_end, seq_len, seq_len), training_mask)
-    test_loader = make(window_starts(val_end, T, seq_len, seq_len), training_mask)
+    valid_loader = make(window_starts(train_end, val_end, seq_len, 1), training_mask)
+    test_loader = make(window_starts(val_end, T, seq_len, 1), training_mask)
     imputegap_loader = make(range(0, T - seq_len + 1, stride), ob_mask)
 
     if verbose:

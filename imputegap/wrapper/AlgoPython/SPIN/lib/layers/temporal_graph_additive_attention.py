@@ -5,7 +5,7 @@ from torch import Tensor
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear
 from torch_geometric.typing import Adj, OptTensor, OptPairTensor
-from ..tsl.nn.layers.norm.layer_norm import LayerNorm
+from tsl.nn.layers.norm import LayerNorm
 
 from .additive_attention import TemporalAdditiveAttention
 

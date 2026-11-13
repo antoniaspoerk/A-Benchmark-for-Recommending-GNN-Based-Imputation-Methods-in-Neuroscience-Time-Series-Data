@@ -1,9 +1,9 @@
 from typing import Optional
 
 from torch import nn
-from ..tsl.nn.base.embedding import StaticGraphEmbedding
-from ..tsl.nn.blocks.encoders.mlp import MLP
-from ..tsl.nn.layers.positional_encoding import PositionalEncoding
+from tsl.nn.base import StaticGraphEmbedding
+from tsl.nn.blocks.encoders import MLP
+from tsl.nn.layers import PositionalEncoding
 
 
 class PositionalEncoder(nn.Module):

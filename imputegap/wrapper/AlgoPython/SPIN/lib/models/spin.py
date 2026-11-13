@@ -4,8 +4,8 @@ import torch
 from torch import nn, Tensor
 from torch.nn import LayerNorm
 from torch_geometric.typing import OptTensor
-from ..tsl.nn.base.embedding import StaticGraphEmbedding
-from ..tsl.nn.blocks.encoders.mlp import MLP
+from tsl.nn.base import StaticGraphEmbedding
+from tsl.nn.blocks.encoders import MLP
 
 from ..layers import PositionalEncoder, TemporalGraphAdditiveAttention
 
