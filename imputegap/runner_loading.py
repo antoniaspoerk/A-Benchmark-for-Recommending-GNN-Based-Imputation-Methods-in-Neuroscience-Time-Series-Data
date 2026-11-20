@@ -13,4 +13,4 @@ print(f"\nImputeGAP datasets : {ts.datasets}")
 ts.load_series(utils.search_path("ds004504_sub-001"), normalizer=None)
 
 # plot and print a subset of time series
-ts.plot(input_data=ts.data, nbr_val=100, save_path=ASSETS)
+ts.plot(input_data=ts.data, nbr_val=-1, save_path=ASSETS)

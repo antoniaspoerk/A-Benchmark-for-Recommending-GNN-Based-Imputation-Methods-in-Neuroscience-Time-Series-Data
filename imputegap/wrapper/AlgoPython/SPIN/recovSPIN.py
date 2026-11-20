@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 import imputegap.tools.utils as utils_imp
-from imputegap.wrapper.AlgoPython.SPIN.dataset_imputegap import get_dataloader
+from imputegap.wrapper.AlgoPython.SPIN.lib.data.dataset_imputegap import get_dataloader
 from imputegap.wrapper.AlgoPython.SPIN.lib.models.spin import SPINModel
 from imputegap.wrapper.AlgoPython.SPIN.lib.scheduler import CosineSchedulerWithRestarts
 
@@ -30,24 +30,24 @@ def masked_l1(y_hat, y, mask):
     return (torch.abs(y_hat - y) * mask).sum() / mask.sum().clamp(min=1)
 
 
-def forward(model, batch, edge_index):
-    return model(batch["x"], batch["u"], batch["mask"], edge_index)
+def forward(model, batch, edge_index, edge_weight):
+    return model(batch["x"], batch["u"], batch["mask"], edge_index, edge_weight)
 
 
-def evaluate(model, loader, edge_index, device):
+def evaluate(model, loader, edge_index, edge_weight, device):
     model.eval()
     err, cnt = 0.0, 0.0
     with torch.no_grad():
         for batch in loader:
             batch = {k: v.to(device) for k, v in batch.items()}
-            x_hat, _ = forward(model, batch, edge_index)
+            x_hat, _ = forward(model, batch, edge_index, edge_weight)
             m = batch["eval_mask"].float()
             err += (torch.abs(x_hat - batch["y"]) * m).sum().item()
             cnt += m.sum().item()
     return err/cnt if cnt > 0 else float("nan")
 
 
-def train(model, train_loader, valid_loader, edge_index, device, epochs, lr, patience, batches_epoch, whiten_prob, grad_clip_val, verbose):
+def train(model, train_loader, valid_loader, edge_index, edge_weight, device, epochs, lr, patience, batches_epoch, whiten_prob, grad_clip_val, verbose):
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = CosineSchedulerWithRestarts(optimizer, num_warmup_steps=12, min_factor=0.1, linear_decay=0.67,num_training_steps=epochs, num_cycles=max(1, epochs // 100))
     whiten_prob = torch.tensor(whiten_prob, device=device)
@@ -65,7 +65,7 @@ def train(model, train_loader, valid_loader, edge_index, device, epochs, lr, pat
             batch["mask"] = mask & whiten_mask
             injected_missing = mask & ~batch["mask"]
             batch["x"] = batch["y"] * batch["mask"]
-            x_hat, imputations = forward(model, batch, edge_index)
+            x_hat, imputations = forward(model, batch, edge_index, edge_weight)
             loss = masked_l1(x_hat, batch["y"], injected_missing)
             for imp in imputations:
                 loss = loss + masked_l1(imp, batch["y"], injected_missing)
@@ -75,7 +75,7 @@ def train(model, train_loader, valid_loader, edge_index, device, epochs, lr, pat
             optimizer.step()
             losses.append(loss.item())
         scheduler.step()
-        val_mae = evaluate(model, valid_loader, edge_index, device)
+        val_mae = evaluate(model, valid_loader, edge_index, edge_weight, device)
         if verbose:
             print(f"\tepoch {epoch + 1}/{epochs}  train_loss {np.mean(losses):.4f}  val_mae {val_mae:.4f}")
         if np.isnan(val_mae):
@@ -92,21 +92,20 @@ def train(model, train_loader, valid_loader, edge_index, device, epochs, lr, pat
     return model
 
 
-def reconstruct(model, imputegap_loader, edge_index, scaler, device):
+def reconstruct(model, imputegap_loader, edge_index, edge_weight, scaler, device):
     model.eval()
     preds = []
     with torch.no_grad():
         for batch in imputegap_loader:
             batch = {k: v.to(device) for k, v in batch.items()}
-            x_hat, _ = forward(model, batch, edge_index)
+            x_hat, _ = forward(model, batch, edge_index, edge_weight)
             preds.append(x_hat[..., 0].cpu())
     preds = torch.cat(preds, 0)  # [windows, steps, nodes]
     return preds * scaler["std"][:, 0] + scaler["mean"][:, 0]  
 
-
 def recovSPIN(incomp_data, seq_len=24, batch_size=8, epochs=30, sliding_windows=1, sim_type="corr", hidden_size=32,
               n_layers=4, eta=3, lr=0.0008, patience=40, batches_epoch=300, num_workers=0, tr_ratio=0.7, seed=42,
-              verbose=True):
+              verbose=True, replicat=False, dataset_name="air36"):
     args = handle_parser()
     recov = np.copy(incomp_data)
     m_mask = np.isnan(incomp_data)
@@ -130,24 +129,24 @@ def recovSPIN(incomp_data, seq_len=24, batch_size=8, epochs=30, sliding_windows=
         print(f"\n(IMPUTATION) SPIN\n\tMatrix: {incomp_data.shape[0]}, {incomp_data.shape[1]}\n\tseq_len: {seq_len}\n\tbatch_size: {batch_size}\n\tepochs: {epochs}\n\tsliding_windows: {stride}\n\tsim_type: {sim_type}\n\thidden_size: {hidden_size}\n\tn_layers: {n_layers}\n\teta: {eta}\n\tlr: {lr}\n\tpatience: {patience}\n\tbatches_epoch: {batches_epoch}\n\tnum_workers: {num_workers}\n\ttr_ratio: {tr_ratio}\n\tval_ratio: {val_len}\n\tts_ratio: {test_len}\n\tdevice: {device}\n")
         print(f"call: spin.impute(params={{'seq_len': {seq_len}, 'batch_size': {batch_size}, 'epochs': {epochs}, 'sliding_windows': {sliding_windows}, 'sim_type': '{sim_type}', 'hidden_size': {hidden_size}, 'n_layers': {n_layers}, 'eta': {eta}, 'lr': {lr}, 'patience': {patience}, 'batches_epoch': {batches_epoch}, 'num_workers': {num_workers}}})\n")
         print("\npre-processing...")
-    train_loader, valid_loader, test_loader, imputegap_loader, edge_index, scaler = get_dataloader(
+    train_loader, valid_loader, test_loader, imputegap_loader, edge_index, edge_weight, scaler = get_dataloader(
         ts_m, seq_len=seq_len, batch_size=batch_size, stride=stride, sim_type=sim_type, tr_ratio=tr_ratio,
         val_len=val_len, test_len=test_len, p_noise=args.p_noise, num_workers=num_workers, verbose=verbose)
-    edge_index = edge_index.to(device)
+    edge_index, edge_weight = edge_index.to(device), edge_weight.to(device)
     model = SPINModel(input_size=1, hidden_size=hidden_size, n_nodes=ts_m.shape[1], u_size=4, output_size=1,
                       n_layers=n_layers, eta=eta, message_layers=args.message_layers, temporal_self_attention=True,
                       reweight=args.reweight).to(device)
 
     if verbose:
         print("\ntraining...")
-    model = train(model, train_loader, valid_loader, edge_index, device, epochs=epochs, lr=lr, patience=patience,
+    model = train(model, train_loader, valid_loader, edge_index, edge_weight, device, epochs=epochs, lr=lr, patience=patience,
                   batches_epoch=batches_epoch, whiten_prob=args.whiten_prob, grad_clip_val=args.grad_clip_val, verbose=verbose)
     torch.save(model.state_dict(), os.path.join(logdir, "spin_best.pt"))
 
     if verbose:
-        print(f"\ntesting...\n\ttest_mae (scaled): {evaluate(model, test_loader, edge_index, device):.4f}")
+        print(f"\ntesting...\n\ttest_mae (scaled): {evaluate(model, test_loader, edge_index, edge_weight, device):.4f}")
         print("\nreconstruct...")
-    preds = reconstruct(model, imputegap_loader, edge_index, scaler, device)
+    preds = reconstruct(model, imputegap_loader, edge_index, edge_weight, scaler, device)
     imputed_matrix = utils_imp.reconstruction_window_based(preds=preds, nbr_timestamps=ts_m.shape[0], sliding_windows=stride, verbose=verbose, deep_verbose=False)
     imputed_matrix = np.asarray(imputed_matrix)[:T]
     recov[m_mask] = imputed_matrix[m_mask]

@@ -14,9 +14,10 @@ alg.impute(params={"seq_len": 24, "batch_size": 8, "epochs": 1, "sliding_windows
 recov = alg.recov_data
 
 missing = np.isnan(incomp)
-print("shape:", recov.shape, " NaN left:", np.isnan(recov).sum(), " 999 left:", (recov == 999).sum())
-print("observed values unchanged:", np.array_equal(recov[~missing], incomp[~missing]))
-r, c = np.argwhere(missing)[0]
-print(f"first gap at row {r}, column {c}: true {data[r, c]:.0f}, imputed {recov[r, c]:.1f}")
-print("mean absolute error on gaps:", np.abs(recov[missing] - data[missing]).mean())
-print("999 in the gaps:", (recov[missing] == 999).sum())
+print("shape:", recov.shape, " NaN left:", np.isnan(recov).sum())
+
+print("missing values:", missing.sum())
+print("columns with gaps:", np.where(missing.any(axis=0))[0])
+np.set_printoptions(precision=2, suppress=True) 
+print(recov)
+print(recov[missing])

@@ -2565,25 +2565,15 @@ class Imputation:
             Changes
             -------
 
-            - Added a custom loader for multivariate data from ImputeGAP (dataset_imputegap.py) replacing the tsl dataset classes (ImputationDataset, SpatioTemporalDataModule), including sliding windows of length seq_len and train/val/test split based on ImputeGAP's training ratio
-
-            - The missing values used for validation and testing (25% of the observed values, point-missing setting of the authors, p_noise=0.25, seed 56789) are added on top of the missing values introduced by ImputeGAP
-
             - Adaptation of the node similarity graph from the data: since no meta data with sensor distances is available, the adjacency is computed from the Pearson correlation of the training data (threshold 0.1, symmetric, no self-loops), or fully connected if sim_type='uniform'
 
             - Adaptation of the temporal encoding: since ImputeGAP provides no timestamps, a synthetic time index with 5-minute steps is used to compute the day/week sine-cosine features (as in GRIN)
 
             - Adaptation of the scaling: z-score normalization per series fitted on the training values, instead of one global StandardScaler
 
-            - Replacement of the PyTorch Lightning / tsl training engine by a plain PyTorch training loop reproducing the original training procedure (whitening of 20/50/80% of the observed values, L1 loss on the injected missing values for the final output and all layer imputations, Adam, cosine scheduler with restarts, gradient clipping 5, early stopping on the validation MAE). The gradient accumulation of the original (split_batch_in) is not used.
+            - Replacement of the PyTorch Lightning/training method by a plain PyTorch training loop reproducing the original training procedure (whitening of 20/50/80% of the observed values, L1 loss on the injected missing values for the final output and all layer imputations, Adam, cosine scheduler with restarts, gradient clipping 5, early stopping on the validation MAE). The gradient accumulation of the original (split_batch_in) is not used.
 
-            - Validation and test windows do not overlap (stride = seq_len) instead of stride 1.
-
-            - Addition of a reconstruction module: the full series is imputed window by window using all observed values, the overlapping windows are averaged back into the original matrix shape, and only the values missing in ImputeGAP's matrix are replaced.
-
-            - Training runs on CUDA or CPU only (Apple MPS is not supported by the sparse attention operations).
-
-            - Reduction of the epochs parameter to 30 (original: 300) and of batches_epoch to 50 (original: 300) for performance reasons.
+            - Added a reconstruction module: the full series is imputed window by window using all observed values, the overlapping windows are averaged back into the original matrix shape, and only the values missing in ImputeGAP's matrix are replaced.
             """
 
             algorithm = "spin"

@@ -25,8 +25,8 @@ def build_edge_index(data, mask, sim_type="corr", thr=0.1):
         raise ValueError(f"sim_type '{sim_type}' not available, use 'corr' or 'uniform'.")
     adj = np.maximum(adj, adj.T)
     np.fill_diagonal(adj, 0.0)
-    edge_index, _ = dense_to_sparse(torch.as_tensor(adj))
-    return edge_index
+    edge_index, edge_weight = dense_to_sparse(torch.as_tensor(adj, dtype=torch.float32))
+    return edge_index, edge_weight
 
 
 class ImputeGAPDataset(Dataset):
@@ -66,7 +66,7 @@ def get_dataloader(ts_m, seq_len, batch_size, stride=1, sim_type="corr", tr_rati
     data = np.nan_to_num((ts_m - mean) / std, nan=0.0)
 
     u = time_encoding(T)
-    edge_index = build_edge_index(ts_m[:train_end], training_mask[:train_end], sim_type=sim_type)
+    edge_index, edge_weight = build_edge_index(ts_m[:train_end], training_mask[:train_end], sim_type=sim_type)
 
     def make(starts, mask, shuffle=False, drop_last=False):
         ds = ImputeGAPDataset(data, mask, eval_mask, u, starts, seq_len)
@@ -82,4 +82,4 @@ def get_dataloader(ts_m, seq_len, batch_size, stride=1, sim_type="corr", tr_rati
         print(f"\t(TRAIN) {len(train_loader.dataset)} | (VAL) {len(valid_loader.dataset)} | (TEST) {len(test_loader.dataset)} | (RECONSTRUCTION) {len(imputegap_loader.dataset)} windows of size {seq_len}")
 
     scaler = dict(mean=torch.as_tensor(mean, dtype=torch.float32)[:, None], std=torch.as_tensor(std, dtype=torch.float32)[:, None])
-    return train_loader, valid_loader, test_loader, imputegap_loader, edge_index, scaler
+    return train_loader, valid_loader, test_loader, imputegap_loader, edge_index, edge_weight, scaler

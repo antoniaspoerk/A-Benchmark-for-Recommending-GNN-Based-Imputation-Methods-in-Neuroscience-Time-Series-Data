@@ -9,7 +9,7 @@ my_algorithms = ["SPIN"]
 
 my_opt = "default_params"
 
-my_datasets = ["eeg-alcohol","ds004504_sub-001"]
+my_datasets = ["ds004504_sub-001","eeg-alcohol"]
 
 my_patterns = ["aligned"]
 
