@@ -5,13 +5,13 @@ ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "imputegap_asse
 from imputegap.recovery.benchmark import Benchmark
 from imputegap.tools import utils
 
-my_algorithms = ["SPIN","GRIN","TimesNet"]
+my_algorithms = ["SPIN"]
 
 my_opt = "default_params"
 
-my_datasets = ["chlorine"]
+my_datasets = ["ds004504_sub-001","eeg-alcohol"]
 
-my_patterns = ["aligned"]
+my_patterns = ["disjoint"]
 
 range = [0.2]
 
