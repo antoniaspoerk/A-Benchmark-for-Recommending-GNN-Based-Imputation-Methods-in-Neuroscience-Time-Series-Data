@@ -1,0 +1,50 @@
+Report for Dataset: ds004504_sub001
+Generated on: 2026-11-20 15:19:11
+Total runtime: 2934.1578 (ms)
+Run number: -1
+========================================================================================================================
+
+
+ds004504_sub001: {disjoint, RMSE, default_params}
+ Rate          SPIN        
+
+  0.2      0.2872484876    
+
+
+
+ds004504_sub001: {disjoint, MAE, default_params}
+ Rate          SPIN        
+
+  0.2      0.2172679273    
+
+
+
+ds004504_sub001: {disjoint, MI, default_params}
+ Rate          SPIN        
+
+  0.2      1.0493252353    
+
+
+
+ds004504_sub001: {disjoint, CORRELATION, default_params}
+ Rate          SPIN        
+
+  0.2      0.9583825085    
+
+
+
+ds004504_sub001: {disjoint, RUNTIME[ms], default_params}
+ Rate          SPIN        
+
+  0.2   2280544.9392795563 
+
+
+
+ds004504_sub001: {disjoint, RUNTIME_LOG, default_params}
+ Rate          SPIN        
+
+  0.2      6.3580386347    
+
+
+Dictionary of Results:
+{'ds004504_sub001': {'disjoint': {'SPIN': {'default_params': {'0.2': {'scores': {'RMSE': 0.2872484876185112, 'MAE': 0.21726792729827024, 'MI': 1.0493252352949693, 'CORRELATION': np.float64(0.9583825085347645), 'RUNTIME': 2280544.9392795563, 'RUNTIME_LOG': 6.358038634651431}}}}}}}
