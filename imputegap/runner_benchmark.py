@@ -17,7 +17,7 @@ range = [0.2]
 
 # launch the evaluation
 bench = Benchmark()
-bench.eval(algorithms=my_algorithms, datasets=my_datasets, patterns=my_patterns, x_axis=range, nbr_vals=2500,optimizer=my_opt, save_dir=os.path.join(ASSETS, "benchmark"))
+bench.eval(algorithms=my_algorithms, datasets=my_datasets, patterns=my_patterns, x_axis=range, nbr_vals=256,optimizer=my_opt, save_dir=os.path.join(ASSETS, "benchmark"))
 
 # display the plot
 bench.subplots.show()
