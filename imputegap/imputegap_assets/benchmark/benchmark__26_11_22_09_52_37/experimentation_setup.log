@@ -1,0 +1,12 @@
+
+The benchmark has been called:
+	algorithms: ['SPIN']
+	datasets: ['ds004504_sub-001', 'eeg-alcohol']
+	patterns: ['disjoint']
+	missing_percentages: [0.2]
+	optimizer: default_params
+	normalizer: z_score
+	runs: 1
+	number max series: 200
+	number max values: 256
+

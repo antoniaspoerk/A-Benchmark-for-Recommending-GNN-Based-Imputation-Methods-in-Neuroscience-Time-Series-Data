@@ -1,0 +1,50 @@
+Report for Dataset: eegalcohol
+Generated on: 2026-11-22 10:06:18
+Total runtime: 820.4287 (ms)
+Run number: -1
+========================================================================================================================
+
+
+eegalcohol: {disjoint, RMSE, default_params}
+ Rate          SPIN        
+
+  0.2      0.7236839837    
+
+
+
+eegalcohol: {disjoint, MAE, default_params}
+ Rate          SPIN        
+
+  0.2      0.5864422820    
+
+
+
+eegalcohol: {disjoint, MI, default_params}
+ Rate          SPIN        
+
+  0.2      0.6469442093    
+
+
+
+eegalcohol: {disjoint, CORRELATION, default_params}
+ Rate          SPIN        
+
+  0.2      0.6895585256    
+
+
+
+eegalcohol: {disjoint, RUNTIME[ms], default_params}
+ Rate          SPIN        
+
+  0.2   666490.0112152100  
+
+
+
+eegalcohol: {disjoint, RUNTIME_LOG, default_params}
+ Rate          SPIN        
+
+  0.2      5.8237936450    
+
+
+Dictionary of Results:
+{'eegalcohol': {'disjoint': {'SPIN': {'default_params': {'0.2': {'scores': {'RMSE': 0.7236839837498891, 'MAE': 0.5864422820188119, 'MI': 0.6469442093214197, 'CORRELATION': np.float64(0.6895585256281306), 'RUNTIME': 666490.01121521, 'RUNTIME_LOG': 5.823793644962747}}}}}}}

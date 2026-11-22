@@ -1,0 +1,6 @@
+
+  output 0 (final x_hat): max |diff| = 8.94e-08
+  output 1 (layer 1 imputation): max |diff| = 1.49e-07
+  output 2 (layer 2 imputation): max |diff| = 6.71e-08
+  output 3 (layer 3 imputation): max |diff| = 8.94e-08
+RESULT: SAME model (identical outputs)

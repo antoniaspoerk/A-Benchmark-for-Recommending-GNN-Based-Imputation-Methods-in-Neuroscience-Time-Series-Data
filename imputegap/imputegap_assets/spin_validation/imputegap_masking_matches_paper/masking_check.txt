@@ -1,0 +1,36 @@
+SPIN masking: ImputeGAP integration vs. authors' code
+test matrix 1000 x 5; torch imputegap 2.14.1 / authors 2.14.1
+
+Test 1  training mask (observed AND NOT held-out)
+        identical: True  (3640 usable values, 0 differences)
+
+Test 2  whitening during training (whiten_prob = [0.2, 0.5, 0.8], one p per sample)
+        identical kept-mask for seeds [0, 1, 2, 3, 4]: [True, True, True, True, True]
+        identical loss target (injected missing):  [True, True, True, True, True]
+        never un-hides missing values: True
+        seed 0: hidden fraction per sample = [0.8, 0.17, 0.84, 0.25]
+        seed 1: hidden fraction per sample = [0.46, 0.78, 0.16, 0.78]
+        seed 2: hidden fraction per sample = [0.21, 0.22, 0.82, 0.25]
+        seed 3: hidden fraction per sample = [0.58, 0.79, 0.53, 0.23]
+        seed 4: hidden fraction per sample = [0.37, 0.14, 0.53, 0.74]
+
+Test 3  evaluation / missing-value masks on a 1000 x 5 matrix (expected to differ)
+        mask                                           rate  gaps  mean len  median   max  series  co-missing
+        paper: point (25 % random)                    23.9%   899       1.3     1.0     5       5       34.1%
+        paper: block (faults 12-48 + 5 % points)       8.3%   215       1.9     1.0    44       5        4.3%
+        imputegap: SPIN internal hold-out (25 %)      24.1%   925       1.3     1.0     6       5       35.4%
+        ImputeGAP pattern: aligned (20%)               4.0%     1     200.0   200.0   200       1        0.0%
+        ImputeGAP pattern: disjoint (20%)             18.0%     5     180.0   200.0   200       5        0.0%
+        ImputeGAP pattern: mcar (20%)                  4.0%    13      15.4    10.0    40       1        0.0%
+        ImputeGAP pattern: scattered (20%)             4.0%     1     200.0   200.0   200       1        0.0%
+        ImputeGAP pattern: overlap (20%)              20.0%     5     200.0   200.0   200       5       20.0%
+        (co-missing = share of time steps where >= 2 series are missing at the same time)
+
+Test 4  recovSPIN() output
+        observed values unchanged: True; missing values filled: 200 -> 0 left
+
+Summary
+        Test 1 training mask  : PASS
+        Test 2 whitening      : PASS
+        Test 4 final output   : PASS
+        Test 3 evaluation masks : documented above (differences by design)

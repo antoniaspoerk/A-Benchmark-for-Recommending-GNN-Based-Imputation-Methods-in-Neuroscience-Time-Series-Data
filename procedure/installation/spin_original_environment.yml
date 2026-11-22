@@ -1,0 +1,35 @@
+name: spin-orig
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - pip<24.1   # newer pip rejects the metadata of pytorch-lightning 1.5.10
+  - conda-forge::cudatoolkit=11.3   # CUDA libraries torch-sparse needs (libcusparse.so.11)
+  # after creating the env, point it to these libraries once:
+  #   conda env config vars set -n spin-orig LD_LIBRARY_PATH=$HOME/.conda/envs/spin-orig/lib
+  - pip:
+      - --find-links https://download.pytorch.org/whl/cu113/torch_stable.html
+      - --find-links https://data.pyg.org/whl/torch-1.10.0+cu113.html
+      - setuptools<60
+      - numpy<1.24
+      - pandas<2
+      - torch==1.10.2+cu113
+      - torchvision==0.11.3+cu113
+      - torchaudio==0.10.2+cu113
+      - torch-scatter==2.0.9
+      - torch-sparse==0.6.13
+      - torch-geometric==2.0.4
+      - pytorch-lightning==1.5.10
+      - torchmetrics==0.7.3
+      - protobuf<4
+      - tensorboard==2.10.1
+      - tables
+      - test-tube
+      - einops
+      - scikit-learn
+      - scipy
+      - pyyaml
+      - tqdm
+      - torch_spatiotemporal==0.1.1
+variables:
+  PYTHONNOUSERSITE: "1"
