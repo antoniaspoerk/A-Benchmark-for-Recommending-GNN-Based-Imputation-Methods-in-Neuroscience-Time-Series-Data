@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 REPO_URL = "https://github.com/Graph-Machine-Learning-Group/spin.git"
-COMMIT = "7349ba31da7306e7e96c13668a3f1f0a4df90902"  # latest commit of the official repo (May 2023)
+COMMIT = "7349ba31da7306e7e96c13668a3f1f0a4df90902"  
 SPIN_REPO = os.path.expanduser("~/spin-original/spin")
 
 
@@ -27,7 +27,7 @@ def print_versions():
 
 
 def download_datasets():
-    os.chdir(SPIN_REPO)  # tsl reads tsl_config.yaml from the working directory
+    os.chdir(SPIN_REPO)  
     from tsl.datasets import AirQuality, MetrLA, PemsBay
     for name, load in [("AQI-36", lambda: AirQuality(impute_nans=True, small=True)),
                        ("METR-LA", MetrLA),
