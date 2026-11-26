@@ -3,7 +3,7 @@ import os
 ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "imputegap_assets"))
 
 from imputegap.recovery.imputation import Imputation
-from imputegap.recovery.contamination import GenGap
+from imputegap.recovery.contamination import GenGAP
 from imputegap.recovery.manager import TimeSeries
 from imputegap.tools import utils
 
@@ -14,7 +14,7 @@ ts = TimeSeries()
 ts.load_series(utils.search_path("eeg-alcohol"), normalizer="z_score")
 
 # contaminate and impute the time series
-ts_m = GenGap.mcar(ts.data)
+ts_m = GenGAP.mcar(ts.data)
 imputer = Imputation.MatrixCompletion.CDRec(ts_m)
 imputer.verbose = False
 
@@ -22,15 +22,12 @@ imputer.verbose = False
 imputer.impute(user_def=False, params={"input_data": ts.data, "optimizer": "ray_tune"})
 
 # compute the imputation metrics with optimized parameter values
-imputer.score(ts.data, imputer.recov_data)
-
 # compute the imputation metrics with default parameter values
 imputer_def = Imputation.MatrixCompletion.CDRec(ts_m).impute()
-imputer_def.score(ts.data, imputer_def.recov_data)
+imputer_def.score(ts.data, imputer_def.recov_data, text="Default values")
 
-# print the imputation metrics with default and optimized parameter values
-ts.print_results(imputer_def.metrics, text="Default values")
-ts.print_results(imputer.metrics, text="Optimized values")
+# compute the imputation metrics with optimized parameter values
+imputer.score(ts.data, imputer.recov_data, text="Optimized values")
 
 # plot the recovered time series
 ts.plot(input_data=ts.data, incomp_data=ts_m, recov_data=imputer.recov_data, nbr_series=9, subplot=True, algorithm=imputer.algorithm, save_path=os.path.join(ASSETS, "imputation"), display=True)

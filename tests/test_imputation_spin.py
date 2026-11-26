@@ -2,7 +2,7 @@ import os
 import unittest
 from imputegap.tools import utils
 from imputegap.recovery.manager import TimeSeries
-from imputegap.recovery.contamination import GenGap
+from imputegap.recovery.contamination import GenGAP
 
 
 class TestSPIN(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestSPIN(unittest.TestCase):
         ts = TimeSeries()
         ts.load_series(utils.search_path(dataset), nbr_series=19, nbr_val=500, normalizer="z_score")
 
-        incomp_data = GenGap.mcar(ts.data)
+        incomp_data = GenGAP.mcar(ts.data)
         algo = utils.config_impute_algorithm(incomp_data=incomp_data, algorithm=name, verbose=True)
         algo.impute(params={"seq_len": 24, "batch_size": 8, "epochs": 2, "sliding_windows": 1, "sim_type": "corr",
                             "hidden_size": 32, "n_layers": 4, "eta": 3, "lr": 0.0008, "patience": 40,
@@ -29,7 +29,6 @@ class TestSPIN(unittest.TestCase):
 
         print(f"{name}:{metrics = }\n")
 
-        ts.print_results(algo.metrics, algo.algorithm)
 
         expected_metrics = {"RMSE": rmse, "MAE": mae}
 

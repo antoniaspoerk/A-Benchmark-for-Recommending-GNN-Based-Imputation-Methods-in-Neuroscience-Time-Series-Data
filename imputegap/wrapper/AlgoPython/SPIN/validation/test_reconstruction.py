@@ -1,11 +1,11 @@
 import warnings; warnings.filterwarnings("ignore")
 import numpy as np
 from imputegap.recovery.imputation import Imputation
-from imputegap.recovery.contamination import GenGap
+from imputegap.recovery.contamination import GenGAP
 
 T, N = 300, 10
 data = np.arange(1, T * N + 1, dtype=float).reshape(T, N)    # row 1: 1-10, row 2: 11-20, row 3: 21-30
-incomp = GenGap.mcar(data)  #contaminate data
+incomp = GenGAP.mcar(data)  #contaminate data
 
 alg = Imputation.DeepLearning.SPIN(incomp)
 alg.impute(params={"seq_len": 24, "batch_size": 8, "epochs": 1, "sliding_windows": 1, "sim_type": "corr",

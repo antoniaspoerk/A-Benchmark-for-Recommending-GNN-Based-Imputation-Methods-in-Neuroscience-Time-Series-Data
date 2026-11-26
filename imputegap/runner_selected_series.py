@@ -1,7 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 from imputegap.recovery.manager import TimeSeries
-from imputegap.recovery.contamination import GenGap
+from imputegap.recovery.contamination import GenGAP
 from imputegap.tools import utils
 
 ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "imputegap_assets", "recovery_plots"))
@@ -31,7 +31,7 @@ for area in selected:
     ts = TimeSeries()
     ts.import_matrix(full.data[first:last, [s - 1 for s in series]])
     ts.normalize(normalizer="z_score", verbose=False)
-    incomp_data = GenGap.disjoint(ts.data, verbose=False)
+    incomp_data = GenGAP.disjoint(ts.data, verbose=False)
 
     for algorithm in my_algorithms:
         imputer = utils.config_impute_algorithm(incomp_data=incomp_data, algorithm=algorithm, verbose=False)

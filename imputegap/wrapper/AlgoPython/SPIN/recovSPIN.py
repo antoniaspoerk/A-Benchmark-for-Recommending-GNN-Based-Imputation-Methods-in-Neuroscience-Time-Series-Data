@@ -119,13 +119,29 @@ def reconstruct(model, imputegap_loader, edge_index, edge_weight, scaler, device
     preds = torch.cat(preds, 0)  # [windows, steps, nodes]
     return preds * scaler["std"][:, 0] + scaler["mean"][:, 0]  
 
+def prepare_deep_learning_params(incomp_data, seq_len, batch_size, sliding_windows, tr_ratio, verbose):
+    # was utils.prepare_deep_learning_params in ImputeGAP 1.1.2 (removed in 1.1.3); same logic
+    error = False
+    multivariate = sliding_windows == 0
+    if seq_len == -1 or batch_size == -1:
+        if multivariate:
+            seq_len, batch_size = utils_imp.auto_seq_sample(matrix=incomp_data, tr_ratio=tr_ratio, verbose=verbose)
+            sliding_windows = seq_len
+        else:
+            seq_len, batch_size = utils_imp.auto_seq_llms(data_x=incomp_data, goal="seq", subset=True, high_limit=50, verbose=verbose)
+    if seq_len > len(incomp_data):
+        print(f"(ERROR) The current seq_length {seq_len} is not adapted to the contaminated matrix {len(incomp_data)} !")
+        error = True
+    return multivariate, seq_len, batch_size, sliding_windows, error
+
+
 def recovSPIN(incomp_data, seq_len=24, batch_size=8, epochs=30, sliding_windows=1, sim_type="corr", hidden_size=32,
               n_layers=4, eta=3, lr=0.0008, patience=40, batches_epoch=300, num_workers=0, tr_ratio=0.7, seed=42,
               verbose=True, replicat=False, dataset_name="air36", split_batch_in=2, precision=16):
     args = handle_parser()
     recov = np.copy(incomp_data)
     m_mask = np.isnan(incomp_data)
-    multivariate, seq_len, batch_size, sliding_windows, error = utils_imp.prepare_deep_learning_params(incomp_data=incomp_data, seq_len=seq_len, batch_size=batch_size, sliding_windows=sliding_windows, tr_ratio=tr_ratio, verbose=verbose)
+    multivariate, seq_len, batch_size, sliding_windows, error = prepare_deep_learning_params(incomp_data=incomp_data, seq_len=seq_len, batch_size=batch_size, sliding_windows=sliding_windows, tr_ratio=tr_ratio, verbose=verbose)
     if error:
         return incomp_data
     stride = seq_len if multivariate else sliding_windows  
