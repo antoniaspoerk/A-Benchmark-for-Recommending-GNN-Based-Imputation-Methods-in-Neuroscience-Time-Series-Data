@@ -1,0 +1,12 @@
+AQI-36, test set, original units (µg/m³)
+
+model                         seed               test MAE       test MSE         test MRE
+original SPIN                 1                  11.20          546.16           0.1582
+original SPIN                 2                  11.23          536.42           0.1586
+original SPIN                 3                  12.50          674.67           0.1766
+original SPIN                 mean ± std (n=3)   11.65 ± 0.74   585.75 ± 77.16   0.1645 ± 0.0105
+ImputeGAP version             1                  11.40          521.28           0.1610
+ImputeGAP version             2                  11.10          542.38           0.1568
+ImputeGAP version             3                  11.88          612.65           0.1678
+ImputeGAP version             mean ± std (n=3)   11.46 ± 0.39   558.77 ± 47.84   0.1619 ± 0.0056
+paper (Marisca et al. 2022)                      11.77 ± 0.54   -                -

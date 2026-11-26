@@ -37,7 +37,7 @@ def test_matrix():
 
 
 def gap_stats(missing):
-    """missing: (T, N) bool -> dict of missing-rate and gap statistics."""
+    """missing: (T, N) bool -> dict of missing-rate and gap statistics"""
     missing = np.asarray(missing, dtype=bool)
     lengths = []
     for col in missing.T:
@@ -119,7 +119,6 @@ SPIN_COMMIT = "7349ba31da7306e7e96c13668a3f1f0a4df90902"
 
 
 def authors_repo():
-    """Path to the authors' SPIN repository; cloned at the pinned commit if it is missing."""
     import subprocess
     repo = os.environ.get("SPIN_REPO", os.path.expanduser("~/spin-original/spin"))
     if not os.path.isdir(os.path.join(repo, "spin")):
@@ -268,7 +267,6 @@ def plot():
 
 
 def run_all():
-    """Run every step this environment can run: save (needs imputegap), check (needs tsl)."""
     import importlib.util
     has = lambda module: importlib.util.find_spec(module) is not None
     if has("imputegap"):

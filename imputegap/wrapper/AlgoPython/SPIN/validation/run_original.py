@@ -59,7 +59,7 @@ def main():
     with open(log_path, "w") as log:
         process = subprocess.Popen(command, cwd=SPIN_REPO, env=env, text=True,
                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        for line in process.stdout:          # show the output live and keep a copy
+        for line in process.stdout:          
             print(line, end="", flush=True)
             log.write(line)
         process.wait()

@@ -33,8 +33,6 @@ SEEDS = [1, 2, 3]
 
 
 class ExportedWindows(Dataset):
-    """Windows over the exported arrays, returning the same dict recovSPIN's loader returns."""
-
     def __init__(self, scaled, training_mask, eval_mask, u, starts, window):
         self.data = torch.as_tensor(scaled, dtype=torch.float32)[..., None]
         self.mask = torch.as_tensor(training_mask)[..., None]
@@ -54,12 +52,10 @@ class ExportedWindows(Dataset):
 
 def train_matched(model, train_loader, valid_loader, edge_index, edge_weight, device, epochs, lr, patience,
                   batches_epoch, whiten_prob, grad_clip_val, accumulate=2, verbose=True):
-    """recovSPIN.train with the authors' gradient accumulation + fp16 mixed precision added.
-    Lines differing from recovSPIN.train are marked  # <- matched."""
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = CosineSchedulerWithRestarts(optimizer, num_warmup_steps=12, min_factor=0.1, linear_decay=0.67,
                                             num_training_steps=epochs, num_cycles=max(1, epochs // 100))
-    scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")           # <- matched
+    scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")           
     whiten_prob = torch.tensor(whiten_prob, device=device)
     best_val, best_state, wait = float("inf"), copy.deepcopy(model.state_dict()), 0
     for epoch in range(epochs):
@@ -67,7 +63,7 @@ def train_matched(model, train_loader, valid_loader, edge_index, edge_weight, de
         losses = []
         optimizer.zero_grad()
         for i, batch in enumerate(train_loader):
-            if i >= batches_epoch * accumulate:                                     # <- matched
+            if i >= batches_epoch * accumulate:                                  
                 break
             batch = {k: v.to(device) for k, v in batch.items()}
             mask = batch["mask"].bool()
@@ -77,13 +73,13 @@ def train_matched(model, train_loader, valid_loader, edge_index, edge_weight, de
             injected_missing = mask & ~batch["mask"]
             batch["x"] = batch["y"] * batch["mask"]
             with torch.autocast(device_type=device.type, dtype=torch.float16,
-                                enabled=device.type == "cuda"):                     # <- matched
+                                enabled=device.type == "cuda"):                     
                 x_hat, imputations = mine.forward(model, batch, edge_index, edge_weight)
                 loss = mine.masked_l1(x_hat.float(), batch["y"], injected_missing)
                 for imp in imputations:
                     loss = loss + mine.masked_l1(imp.float(), batch["y"], injected_missing)
-            scaler.scale(loss / accumulate).backward()                              # <- matched
-            if (i + 1) % accumulate == 0:                                           # <- matched
+            scaler.scale(loss / accumulate).backward()                              
+            if (i + 1) % accumulate == 0:                                           
                 scaler.unscale_(optimizer)
                 torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip_val)
                 scaler.step(optimizer)
@@ -108,10 +104,9 @@ def train_matched(model, train_loader, valid_loader, edge_index, edge_weight, de
     return model
 
 
-def test_mae_like_authors(model, loader, edge_index, edge_weight, bias, scale, device):
-    """Authors' metric: masked MAE in original units over all test windows (eval_mask points)."""
+def test_metrics(model, loader, edge_index, edge_weight, bias, scale, device):
     model.eval()
-    err, cnt = 0.0, 0.0
+    abs_err, sq_err, abs_y, cnt = 0.0, 0.0, 0.0, 0.0
     with torch.no_grad():
         for batch in loader:
             batch = {k: v.to(device) for k, v in batch.items()}
@@ -119,15 +114,17 @@ def test_mae_like_authors(model, loader, edge_index, edge_weight, bias, scale, d
             y_hat = x_hat.float() * scale + bias
             y = batch["y"] * scale + bias
             m = batch["eval_mask"].float()
-            err += (torch.abs(y_hat - y) * m).sum().item()
+            abs_err += (torch.abs(y_hat - y) * m).sum().item()
+            sq_err += ((y_hat - y) ** 2 * m).sum().item()
+            abs_y += (torch.abs(y) * m).sum().item()
             cnt += m.sum().item()
-    return err / cnt
+    return abs_err / cnt, sq_err / cnt, abs_err / abs_y
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--dataset", help="default: chosen from SLURM_ARRAY_TASK_ID")
-    p.add_argument("--seed", type=int, help="default: chosen from SLURM_ARRAY_TASK_ID")
+    p.add_argument("--dataset")
+    p.add_argument("--seed", type=int)
     p.add_argument("--mode", choices=["yours", "old", "matched"], default="yours")
     p.add_argument("--exported", default=os.path.expanduser("~/spin-original/validation/exported"))
     p.add_argument("--results", default=os.path.expanduser("~/spin-original/validation/results"))
@@ -148,7 +145,7 @@ def main():
     hp = toml.load(os.path.join(os.path.dirname(imputegap.__file__), "env", "default_values.toml"))["spin"]
     if a.epochs is not None:
         hp["epochs"] = a.epochs
-    extra = mine.handle_parser([])  # whiten_prob, grad_clip_val, message_layers, reweight (ImputeGAP version defaults)
+    extra = mine.handle_parser([])  
     print(f"dataset={a.dataset} seed={a.seed} mode={a.mode} device={device} "
           f"gpu={torch.cuda.get_device_name(0) if device.type == 'cuda' else '-'}")
     print(f"ImputeGAP version [spin] params: {hp}")
@@ -185,10 +182,10 @@ def main():
     t0 = time.time()
     common = dict(epochs=hp["epochs"], lr=hp["lr"], patience=hp["patience"], batches_epoch=hp["batches_epoch"],
                   whiten_prob=extra.whiten_prob, grad_clip_val=extra.grad_clip_val, verbose=True)
-    if a.mode == "yours":    # same arguments recovSPIN() passes since da244850
+    if a.mode == "yours":    
         model = mine.train(model, train_loader, valid_loader, edge_index, edge_weight, device, **common,
                            split_batch_in=2, precision=16)
-    elif a.mode == "old":    # recovSPIN before da244850
+    elif a.mode == "old":    
         model = mine.train(model, train_loader, valid_loader, edge_index, edge_weight, device, **common,
                            split_batch_in=1, precision=32)
     else:
@@ -197,17 +194,20 @@ def main():
 
     t_bias = torch.as_tensor(bias, device=device).view(1, 1, -1, 1) if bias.size == N else float(bias.reshape(-1)[0])
     t_scale = torch.as_tensor(scale, device=device).view(1, 1, -1, 1) if scale.size == N else float(scale.reshape(-1)[0])
-    mae = test_mae_like_authors(model, test_loader, edge_index, edge_weight, t_bias, t_scale, device)
+    mae, mse, mre = test_metrics(model, test_loader, edge_index, edge_weight, t_bias, t_scale, device)
     print(f"Test MAE: {mae:.4f}")
+    print(f"Test MSE: {mse:.4f}")
+    print(f"Test MRE: {mre:.4f}")
 
     os.makedirs(a.results, exist_ok=True)
-    out = os.path.join(a.results, f"mine_{a.mode}.csv")
+    out = os.path.join(a.results, f"mine_{a.mode}_metrics.csv")
     new = not os.path.exists(out)
     with open(out, "a", newline="") as f:
         w = csv.writer(f)
         if new:
-            w.writerow(["dataset", "seed", "mode", "test_mae", "seconds", "node"])
-        w.writerow([a.dataset, a.seed, a.mode, f"{mae:.4f}", int(seconds), os.uname().nodename])
+            w.writerow(["dataset", "seed", "mode", "test_mae", "test_mse", "test_mre", "seconds", "node"])
+        w.writerow([a.dataset, a.seed, a.mode, f"{mae:.4f}", f"{mse:.4f}", f"{mre:.4f}", int(seconds),
+                    os.uname().nodename])
 
 
 if __name__ == "__main__":
